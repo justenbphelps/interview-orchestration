@@ -52,7 +52,7 @@ export async function startInterview(config: InterviewConfig): Promise<{
 
   return {
     threadId: thread.thread_id,
-    state: result as GraphState,
+    state: result as unknown as GraphState,
   };
 }
 
@@ -70,7 +70,7 @@ export async function sendMessage(
     },
   });
 
-  return result as GraphState;
+  return result as unknown as GraphState;
 }
 
 // =============================================================================
@@ -120,7 +120,7 @@ export async function* streamMessage(
 
 export async function getThreadState(threadId: string): Promise<GraphState> {
   const state = await client.threads.getState(threadId);
-  return state.values as GraphState;
+  return state.values as unknown as GraphState;
 }
 
 // =============================================================================

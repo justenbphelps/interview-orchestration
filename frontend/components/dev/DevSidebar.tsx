@@ -451,43 +451,40 @@ export function DevSidebar({
   // RENDER
   // =============================================================================
 
-  if (!isOpen) {
-    return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed left-0 top-1/2 -translate-y-1/2 z-[9999] bg-slate-900 text-white p-2 rounded-r-lg shadow-lg hover:bg-slate-800 transition-colors"
-        title="Open Dev Panel"
-      >
-        <ChevronRight className="h-5 w-5" />
-      </button>
-    );
-  }
-
   return (
-    <div
-      className="fixed left-0 top-0 bottom-0 bg-slate-900 text-slate-100 shadow-2xl z-[9999] flex flex-col"
-      style={{ fontSize: "13px", width: `${sidebarWidth}px` }}
-    >
-      {/* Resize Handle */}
-      <div
-        onMouseDown={handleMouseDown}
-        className={`absolute right-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-purple-500 transition-colors ${
-          isResizing ? "bg-purple-500" : "bg-transparent hover:bg-purple-500/50"
+    <>
+      {/* Edge Toggle Button - Always visible */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`fixed top-1/2 -translate-y-1/2 z-[10000] bg-slate-900 text-white p-2 shadow-lg hover:bg-slate-800 transition-all ${
+          isOpen 
+            ? "rounded-r-lg" 
+            : "left-0 rounded-r-lg"
         }`}
-      />
-      {/* Header */}
-      <div className="p-4 border-b border-slate-700 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Settings className="h-5 w-5 text-purple-400" />
-          <span className="font-semibold">Dev Panel</span>
-        </div>
-        <button
-          onClick={() => setIsOpen(false)}
-          className="p-1 hover:bg-slate-800 rounded"
+        style={isOpen ? { left: `${sidebarWidth}px` } : undefined}
+        title={isOpen ? "Close Dev Panel" : "Open Dev Panel"}
+      >
+        {isOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+      </button>
+
+      {/* Sidebar Panel */}
+      {isOpen && (
+        <div
+          className="fixed left-0 top-0 bottom-0 bg-slate-900 text-slate-100 shadow-2xl z-[9999] flex flex-col"
+          style={{ fontSize: "13px", width: `${sidebarWidth}px` }}
         >
-          <ChevronLeft className="h-5 w-5" />
-        </button>
-      </div>
+          {/* Resize Handle */}
+          <div
+            onMouseDown={handleMouseDown}
+            className={`absolute right-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-purple-500 transition-colors ${
+              isResizing ? "bg-purple-500" : "bg-transparent hover:bg-purple-500/50"
+            }`}
+          />
+          {/* Header */}
+          <div className="p-4 border-b border-slate-700 flex items-center gap-2">
+            <Settings className="h-5 w-5 text-purple-400" />
+            <span className="font-semibold">Dev Panel</span>
+          </div>
 
       {/* Interview State */}
       {interviewState && (
@@ -1115,16 +1112,18 @@ export function DevSidebar({
         )}
       </div>
 
-      {/* Footer Actions */}
-      <div className="p-3 border-t border-slate-700 space-y-2">
-        <button
-          onClick={onRestart}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md bg-purple-600 text-white hover:bg-purple-500 transition-colors"
-        >
-          <Play className="h-4 w-4" />
-          Apply & Restart Interview
-        </button>
-      </div>
-    </div>
+          {/* Footer Actions */}
+          <div className="p-3 border-t border-slate-700 space-y-2">
+            <button
+              onClick={onRestart}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md bg-purple-600 text-white hover:bg-purple-500 transition-colors"
+            >
+              <Play className="h-4 w-4" />
+              Apply & Restart Interview
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

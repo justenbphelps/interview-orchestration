@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -16,6 +16,9 @@ import {
   Trash2,
   GitBranch,
   ArrowRight,
+  ExternalLink,
+  Cloud,
+  CloudOff,
 } from "lucide-react";
 
 // =============================================================================
@@ -38,6 +41,13 @@ interface TraceSidebarProps {
   events: TraceEvent[];
   onClear: () => void;
   isConnected: boolean;
+  threadId?: string | null;
+}
+
+interface LangSmithStatus {
+  enabled: boolean;
+  project?: string;
+  error?: string;
 }
 
 // =============================================================================
@@ -145,11 +155,30 @@ const getEventTooltip = (type: TraceEvent["type"]): { title: string; description
 // COMPONENT
 // =============================================================================
 
-export function TraceSidebar({ events, onClear, isConnected }: TraceSidebarProps) {
+export function TraceSidebar({ events, onClear, isConnected, threadId }: TraceSidebarProps) {
   const [isOpen, setIsOpen] = useState(true);
   const [expandedEvents, setExpandedEvents] = useState<Set<string>>(new Set());
   const [sidebarWidth, setSidebarWidth] = useState(350);
   const [isResizing, setIsResizing] = useState(false);
+  const [langsmithStatus, setLangsmithStatus] = useState<LangSmithStatus | null>(null);
+
+  // Check LangSmith status on mount
+  useEffect(() => {
+    async function checkLangSmith() {
+      try {
+        const response = await fetch("/api/traces?limit=1");
+        const data = await response.json();
+        setLangsmithStatus({
+          enabled: data.enabled,
+          project: data.project,
+          error: data.error,
+        });
+      } catch {
+        setLangsmithStatus({ enabled: false });
+      }
+    }
+    checkLangSmith();
+  }, []);
 
   const toggleEventExpanded = (id: string) => {
     const newExpanded = new Set(expandedEvents);
@@ -185,59 +214,87 @@ export function TraceSidebar({ events, onClear, isConnected }: TraceSidebarProps
     document.body.style.userSelect = "none";
   };
 
-  if (!isOpen) {
-    return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed right-0 top-1/2 -translate-y-1/2 z-[9999] bg-slate-900 text-white p-2 rounded-l-lg shadow-lg hover:bg-slate-800 transition-colors"
-        title="Open Trace Panel"
-      >
-        <ChevronLeft className="h-5 w-5" />
-      </button>
-    );
-  }
-
   return (
-    <div
-      className="fixed right-0 top-0 bottom-0 bg-slate-900 text-slate-100 shadow-2xl z-[9998] flex flex-col"
-      style={{ width: `${sidebarWidth}px`, fontSize: "12px" }}
-    >
-      {/* Resize Handle */}
-      <div
-        onMouseDown={handleMouseDown}
-        className={`absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-purple-500 transition-colors ${
-          isResizing ? "bg-purple-500" : "bg-transparent hover:bg-purple-500/50"
+    <>
+      {/* Edge Toggle Button - Always visible */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`fixed top-1/2 -translate-y-1/2 z-[10000] bg-slate-900 text-white p-2 shadow-lg hover:bg-slate-800 transition-all ${
+          isOpen 
+            ? "rounded-l-lg" 
+            : "right-0 rounded-l-lg"
         }`}
-      />
+        style={isOpen ? { right: `${sidebarWidth}px` } : undefined}
+        title={isOpen ? "Close Trace Panel" : "Open Trace Panel"}
+      >
+        {isOpen ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+      </button>
 
-      {/* Header */}
-      <div className="p-3 border-b border-slate-700 flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center gap-2">
-          <GitBranch className="h-4 w-4 text-green-400" />
-          <span className="font-semibold text-sm">Graph Trace</span>
-          <span
-            className={`w-2 h-2 rounded-full ${
-              isConnected ? "bg-green-500" : "bg-red-500"
+      {/* Sidebar Panel */}
+      {isOpen && (
+        <div
+          className="fixed right-0 top-0 bottom-0 bg-slate-900 text-slate-100 shadow-2xl z-[9998] flex flex-col"
+          style={{ width: `${sidebarWidth}px`, fontSize: "12px" }}
+        >
+          {/* Resize Handle */}
+          <div
+            onMouseDown={handleMouseDown}
+            className={`absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-purple-500 transition-colors ${
+              isResizing ? "bg-purple-500" : "bg-transparent hover:bg-purple-500/50"
             }`}
-            title={isConnected ? "Connected" : "Disconnected"}
           />
-        </div>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={onClear}
-            className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-slate-200"
-            title="Clear trace"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => setIsOpen(false)}
-            className="p-1 hover:bg-slate-800 rounded"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
-        </div>
-      </div>
+
+          {/* Header */}
+          <div className="p-3 border-b border-slate-700 flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <GitBranch className="h-4 w-4 text-green-400" />
+                <span className="font-semibold text-sm">Graph Trace</span>
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    isConnected ? "bg-green-500" : "bg-red-500"
+                  }`}
+                  title={isConnected ? "Connected" : "Disconnected"}
+                />
+              </div>
+              <button
+                onClick={onClear}
+                className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-slate-200"
+                title="Clear trace"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+            
+            {/* LangSmith Status */}
+            <div className="mt-2 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-1.5">
+                {langsmithStatus?.enabled ? (
+                  <>
+                    <Cloud className="h-3 w-3 text-green-400" />
+                    <span className="text-green-400">LangSmith</span>
+                  </>
+                ) : (
+                  <>
+                    <CloudOff className="h-3 w-3 text-slate-500" />
+                    <span className="text-slate-500">LangSmith Off</span>
+                  </>
+                )}
+              </div>
+              {langsmithStatus?.enabled && langsmithStatus.project && (
+                <a
+                  href={`https://smith.langchain.com/o/default/projects/p/${langsmithStatus.project}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-purple-400 hover:text-purple-300 transition-colors"
+                  title="Open in LangSmith"
+                >
+                  <span>View Traces</span>
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              )}
+            </div>
+          </div>
 
       {/* Stats Bar */}
       <div className="px-3 py-2 bg-slate-800/50 border-b border-slate-700 flex items-center gap-4 text-xs flex-shrink-0">
@@ -364,7 +421,9 @@ export function TraceSidebar({ events, onClear, isConnected }: TraceSidebarProps
           </span>
         </div>
       </div>
-    </div>
+        </div>
+      )}
+    </>
   );
 }
 

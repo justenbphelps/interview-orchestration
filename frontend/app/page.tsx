@@ -137,6 +137,7 @@ export default function InterviewPage() {
         events={interview.traceEvents}
         onClear={interview.clearTraceEvents}
         isConnected={!!interview.threadId}
+        threadId={interview.threadId}
       />
 
       {/* Main Content - Always centered */}
