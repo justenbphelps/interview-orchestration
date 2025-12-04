@@ -3,6 +3,12 @@ index.js
 index.d.ts
 node_modules
 dist
+
+# Next.js
+.next
+out
+frontend/.next
+frontend/out
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
