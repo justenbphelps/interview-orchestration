@@ -28,3 +28,6 @@ frontend/out
 
 # LangGraph API
 .langgraph_api
+
+# Cursor assets (screenshots shared in chat)
+assets/

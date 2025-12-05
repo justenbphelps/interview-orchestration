@@ -21,6 +21,7 @@ module.exports = {
     "*.js",
     "*.cjs",
     "*.d.ts",
+    "frontend",
   ],
   rules: {
     "no-process-env": 2,

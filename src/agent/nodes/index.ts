@@ -3,6 +3,7 @@ export { initialize } from "./initialize.js";
 export { askQuestion } from "./askQuestion.js";
 export { translateIfNeeded } from "./translateIfNeeded.js";
 export { validateFormat } from "./validateFormat.js";
+export { checkRelevance } from "./checkRelevance.js";
 export { reprompt } from "./reprompt.js";
 export { storeBasicResponse } from "./storeBasicResponse.js";
 export { checkConcerns } from "./checkConcerns.js";

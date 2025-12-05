@@ -14,6 +14,7 @@ import {
   askQuestion,
   translateIfNeeded,
   validateFormat,
+  checkRelevance,
   reprompt,
   storeBasicResponse,
   respondToConcerns,
@@ -88,9 +89,21 @@ const routeEntry = (
 };
 
 /**
- * Routes after validateFormat - either reprompt or continue processing.
+ * Routes after validateFormat - either reprompt or continue to relevance check.
  */
 const routeAfterValidate = (
+  state: InterviewState
+): "reprompt" | "checkRelevance" => {
+  if (state.needsReprompt) {
+    return "reprompt";
+  }
+  return "checkRelevance";
+};
+
+/**
+ * Routes after checkRelevance - either reprompt for irrelevant response or continue.
+ */
+const routeAfterRelevance = (
   state: InterviewState
 ): "reprompt" | "routeByQuestionType" => {
   if (state.needsReprompt) {
@@ -168,6 +181,7 @@ const builder = new StateGraph(InterviewStateAnnotation)
   .addNode("askQuestion", askQuestion)
   .addNode("translateIfNeeded", translateIfNeeded)
   .addNode("validateFormat", validateFormat)
+  .addNode("checkRelevance", checkRelevance)
   .addNode("reprompt", reprompt)
   .addNode("storeBasicResponse", storeBasicResponse)
   .addNode("analyzeResponse", analyzeResponseParallel)
@@ -205,8 +219,14 @@ const builder = new StateGraph(InterviewStateAnnotation)
   // Translation → Validation
   .addEdge("translateIfNeeded", "validateFormat")
   
-  // Validation routing
+  // Validation routing - format check
   .addConditionalEdges("validateFormat", routeAfterValidate, [
+    "reprompt",
+    "checkRelevance",
+  ])
+  
+  // Relevance check routing - is response on-topic?
+  .addConditionalEdges("checkRelevance", routeAfterRelevance, [
     "reprompt",
     "routeByQuestionType",
   ])
