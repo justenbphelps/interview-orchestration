@@ -8,7 +8,13 @@ import type { InterviewConfig, Question } from "./types";
 const LANGGRAPH_URL =
   process.env.NEXT_PUBLIC_LANGGRAPH_URL || "http://localhost:2024";
 
-export const client = new Client({ apiUrl: LANGGRAPH_URL });
+// LangGraph Cloud requires authentication with a LangSmith API key
+const LANGSMITH_API_KEY = process.env.NEXT_PUBLIC_LANGSMITH_API_KEY;
+
+export const client = new Client({
+  apiUrl: LANGGRAPH_URL,
+  apiKey: LANGSMITH_API_KEY,
+});
 
 // =============================================================================
 // GRAPH STATE INTERFACE
