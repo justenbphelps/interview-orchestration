@@ -92,6 +92,32 @@ export const validateYesNo = (response: string): ValidationResult => {
 };
 
 /**
+ * Parses an option index from user input.
+ * Handles: "1", "2", "a", "b", etc.
+ */
+const parseOptionIndex = (
+  input: string,
+  maxOptions: number
+): number | null => {
+  // Try numeric index (1-based)
+  const num = parseInt(input, 10);
+  if (!isNaN(num) && num >= 1 && num <= maxOptions) {
+    return num - 1; // Convert to 0-based
+  }
+
+  // Try letter index (a, b, c, etc.)
+  if (input.length === 1) {
+    const charCode = input.charCodeAt(0);
+    // 'a' = 97, 'b' = 98, etc.
+    if (charCode >= 97 && charCode < 97 + maxOptions) {
+      return charCode - 97;
+    }
+  }
+
+  return null;
+};
+
+/**
  * Validates a single select response against provided options.
  * Uses fuzzy matching (case-insensitive, trimmed).
  */
@@ -153,32 +179,6 @@ export const validateSingleSelect = (
     isValid: false,
     errorMessage: `Please choose one of the options: ${options.join(", ")}`,
   };
-};
-
-/**
- * Parses an option index from user input.
- * Handles: "1", "2", "a", "b", etc.
- */
-const parseOptionIndex = (
-  input: string,
-  maxOptions: number
-): number | null => {
-  // Try numeric index (1-based)
-  const num = parseInt(input, 10);
-  if (!isNaN(num) && num >= 1 && num <= maxOptions) {
-    return num - 1; // Convert to 0-based
-  }
-
-  // Try letter index (a, b, c, etc.)
-  if (input.length === 1) {
-    const charCode = input.charCodeAt(0);
-    // 'a' = 97, 'b' = 98, etc.
-    if (charCode >= 97 && charCode < 97 + maxOptions) {
-      return charCode - 97;
-    }
-  }
-
-  return null;
 };
 
 /**

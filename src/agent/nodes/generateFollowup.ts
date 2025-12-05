@@ -56,7 +56,7 @@ export const generateFollowup = async (
     };
 
     // Update the current followups - store the main answer first if this is first followup
-    let updatedFollowups = [...state.currentFollowups];
+    const updatedFollowups = [...state.currentFollowups];
     
     // If this is the first followup, we need to track the original answer
     // The followup exchange will be completed when user responds

@@ -18,6 +18,7 @@ import { RunnableConfig } from "@langchain/core/runnables";
  * Check if LangSmith tracing is enabled.
  */
 export function isTracingEnabled(): boolean {
+  // eslint-disable-next-line no-process-env
   return process.env.LANGSMITH_TRACING === "true" && !!process.env.LANGSMITH_API_KEY;
 }
 
@@ -25,6 +26,7 @@ export function isTracingEnabled(): boolean {
  * Get the LangSmith project name.
  */
 export function getProjectName(): string {
+  // eslint-disable-next-line no-process-env
   return process.env.LANGSMITH_PROJECT || "interview-orchestration";
 }
 
@@ -157,6 +159,7 @@ export function logTrace(
   message: string,
   metadata?: Record<string, unknown>
 ): void {
+  // eslint-disable-next-line no-process-env
   if (process.env.NODE_ENV === "development" || process.env.DEBUG) {
     const timestamp = new Date().toISOString();
     const prefix = `[TRACE ${timestamp}]`;
