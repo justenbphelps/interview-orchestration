@@ -177,7 +177,7 @@ export function DevSidebar({
   currentQuestion,
   interviewState,
 }: DevSidebarProps) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [expandedQuestion, setExpandedQuestion] = useState<number | null>(null);
   const [showAddQuestion, setShowAddQuestion] = useState(false);
   const [activeSection, setActiveSection] = useState<string>("setup");
@@ -453,33 +453,29 @@ export function DevSidebar({
 
   return (
     <>
-      {/* Edge Toggle Button - Always visible */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`fixed top-1/2 -translate-y-1/2 z-[10000] bg-slate-900 text-white p-2 shadow-lg hover:bg-slate-800 transition-all ${
-          isOpen 
-            ? "rounded-r-lg" 
-            : "left-0 rounded-r-lg"
-        }`}
-        style={isOpen ? { left: `${sidebarWidth}px` } : undefined}
-        title={isOpen ? "Close Dev Panel" : "Open Dev Panel"}
+      {/* Sidebar Container - slides in/out */}
+      <div
+        className="fixed top-0 bottom-0 z-[9999] flex transition-transform duration-300 ease-in-out"
+        style={{ 
+          left: 0,
+          transform: isOpen ? 'translateX(0)' : `translateX(-${sidebarWidth}px)`
+        }}
       >
-        {isOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-      </button>
-
-      {/* Sidebar Panel */}
-      {isOpen && (
+        {/* Sidebar Panel */}
         <div
-          className="fixed left-0 top-0 bottom-0 bg-slate-900 text-slate-100 shadow-2xl z-[9999] flex flex-col"
+          className="relative bg-slate-900 text-slate-100 shadow-2xl flex flex-col h-full"
           style={{ fontSize: "13px", width: `${sidebarWidth}px` }}
         >
-          {/* Resize Handle */}
-          <div
-            onMouseDown={handleMouseDown}
-            className={`absolute right-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-purple-500 transition-colors ${
-              isResizing ? "bg-purple-500" : "bg-transparent hover:bg-purple-500/50"
-            }`}
-          />
+
+          {/* Resize Handle - only visible when open */}
+          {isOpen && (
+            <div
+              onMouseDown={handleMouseDown}
+              className={`absolute right-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-purple-500 transition-colors ${
+                isResizing ? "bg-purple-500" : "bg-transparent hover:bg-purple-500/50"
+              }`}
+            />
+          )}
           {/* Header */}
           <div className="p-4 border-b border-slate-700 flex items-center gap-2">
             <Settings className="h-5 w-5 text-purple-400" />
@@ -539,7 +535,21 @@ export function DevSidebar({
         {/* Setup Tab */}
         {activeSection === "setup" && (
           <div className="p-3 space-y-4">
-            <div className="text-xs text-slate-400 mb-4">
+            {/* Interview Type Badge */}
+            <div className="flex items-center gap-2 p-2 bg-slate-800 rounded-lg">
+              <span className={`px-2 py-1 text-xs rounded-full ${
+                config.interview_type === "screener" 
+                  ? "bg-blue-500/20 text-blue-300" 
+                  : "bg-orange-500/20 text-orange-300"
+              }`}>
+                {config.interview_type === "screener" ? "Screener Interview" : "Exit Interview"}
+              </span>
+              <span className="text-xs text-slate-500">
+                {config.questions.length} questions
+              </span>
+            </div>
+
+            <div className="text-xs text-slate-400">
               Configure the basic interview information that will be used in prompts and messages.
             </div>
 
@@ -556,11 +566,15 @@ export function DevSidebar({
 
             {/* Job Title */}
             <div>
-              <Label className="text-xs text-slate-400">Job Title / Position *</Label>
+              <Label className="text-xs text-slate-400">
+                {config.interview_type === "screener" ? "Job Title / Position *" : "Employee Role *"}
+              </Label>
               <Input
                 value={config.setup?.jobTitle || ""}
                 onChange={(e) => updateSetup({ jobTitle: e.target.value })}
-                placeholder="e.g., Senior Software Engineer"
+                placeholder={config.interview_type === "screener" 
+                  ? "e.g., Senior Software Engineer" 
+                  : "e.g., Departing Employee"}
                 className="mt-1 bg-slate-700 border-slate-600 text-sm"
               />
             </div>
@@ -921,9 +935,12 @@ export function DevSidebar({
                 onChange={(e) => updateConfig({ interview_type: e.target.value as "screener" | "exit" })}
                 className="w-full mt-1 bg-slate-700 border-slate-600 rounded text-sm p-2"
               >
-                <option value="screener">Screener</option>
+                <option value="screener">Screener Interview</option>
                 <option value="exit">Exit Interview</option>
               </select>
+              <p className="text-xs text-amber-400 mt-1">
+                ⚠️ Changing type loads a new template with different questions
+              </p>
             </div>
 
             {/* LLM Fallback */}
@@ -1123,7 +1140,16 @@ export function DevSidebar({
             </button>
           </div>
         </div>
-      )}
+
+        {/* Toggle Button - attached to sidebar */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="self-center bg-slate-100 text-slate-400 p-2 shadow-sm border border-slate-200 hover:bg-slate-200 hover:text-slate-600 transition-colors rounded-r-lg border-l-0"
+          title={isOpen ? "Close Dev Panel" : "Open Dev Panel"}
+        >
+          {isOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+        </button>
+      </div>
     </>
   );
 }

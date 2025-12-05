@@ -4,6 +4,13 @@ import { useState } from "react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 
@@ -13,14 +20,55 @@ interface SingleSelectProps {
   disabled?: boolean;
 }
 
+// Use dropdown for 5+ options, radio buttons for fewer
+const DROPDOWN_THRESHOLD = 5;
+
 export function SingleSelect({ options, onSubmit, disabled }: SingleSelectProps) {
   const [selected, setSelected] = useState<string>("");
+  const useDropdown = options.length >= DROPDOWN_THRESHOLD;
 
   const handleSubmit = () => {
     if (selected) {
       onSubmit(selected);
     }
   };
+
+  if (useDropdown) {
+    return (
+      <div className="space-y-4 animate-fade-in">
+        <Select
+          value={selected}
+          onValueChange={setSelected}
+          disabled={disabled}
+        >
+          <SelectTrigger
+            className={cn(
+              "w-full transition-all",
+              selected && "border-primary"
+            )}
+          >
+            <SelectValue placeholder="Select an option..." />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((option) => (
+              <SelectItem key={option} value={option}>
+                {option}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Button
+          onClick={handleSubmit}
+          disabled={disabled || !selected}
+          className="w-full"
+          size="lg"
+        >
+          Submit
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 animate-fade-in">
@@ -67,4 +115,3 @@ export function SingleSelect({ options, onSubmit, disabled }: SingleSelectProps)
     </div>
   );
 }
-

@@ -18,6 +18,7 @@ interface InterviewContainerProps {
   isStreaming: boolean;
   error: string | null;
   onRespond: (response: string) => void;
+  interviewType?: "screener" | "exit";
 }
 
 export function InterviewContainer({
@@ -30,22 +31,26 @@ export function InterviewContainer({
   isStreaming,
   error,
   onRespond,
+  interviewType = "screener",
 }: InterviewContainerProps) {
+  const interviewTitle = interviewType === "screener" 
+    ? "Screening Interview" 
+    : "Exit Interview";
   return (
     <Card 
       className="shadow-2xl border-0 overflow-hidden flex flex-col h-full"
     >
       {/* Header - Fixed */}
-      <CardHeader className="border-b bg-gradient-to-r from-primary/5 to-primary/10 flex-shrink-0">
+      <CardHeader className="border-b bg-white flex-shrink-0">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-xl">
             {isComplete ? (
               <>
                 <CheckCircle className="h-6 w-6 text-green-500" />
-                Interview Complete
+                {interviewTitle} Complete
               </>
             ) : (
-              "Interview"
+              interviewTitle
             )}
           </CardTitle>
 
@@ -72,12 +77,20 @@ export function InterviewContainer({
 
       <CardContent className="p-0 flex-1 flex flex-col min-h-0 overflow-hidden">
         {/* Messages - Scrollable */}
-        <div className="flex-1 overflow-y-auto p-6 min-h-0">
-          <MessageList messages={messages} />
+        <div className="flex-1 overflow-y-auto p-6 min-h-0 flex flex-col">
+          <div className={cn(
+            "flex-1",
+            messages.length === 0 && "flex flex-col"
+          )}>
+            <MessageList messages={messages} />
+          </div>
 
           {/* Loading Indicator */}
           {isLoading && !isStreaming && (
-            <div className="flex items-center gap-2 text-muted-foreground mt-4 animate-fade-in">
+            <div className={cn(
+              "flex items-center gap-2 text-muted-foreground animate-fade-in",
+              messages.length === 0 ? "justify-center" : "mt-4"
+            )}>
               <Loader2 className="h-4 w-4 animate-spin" />
               <span>Typing...</span>
             </div>

@@ -156,7 +156,7 @@ const getEventTooltip = (type: TraceEvent["type"]): { title: string; description
 // =============================================================================
 
 export function TraceSidebar({ events, onClear, isConnected, threadId }: TraceSidebarProps) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [expandedEvents, setExpandedEvents] = useState<Set<string>>(new Set());
   const [sidebarWidth, setSidebarWidth] = useState(350);
   const [isResizing, setIsResizing] = useState(false);
@@ -216,33 +216,37 @@ export function TraceSidebar({ events, onClear, isConnected, threadId }: TraceSi
 
   return (
     <>
-      {/* Edge Toggle Button - Always visible */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`fixed top-1/2 -translate-y-1/2 z-[10000] bg-slate-900 text-white p-2 shadow-lg hover:bg-slate-800 transition-all ${
-          isOpen 
-            ? "rounded-l-lg" 
-            : "right-0 rounded-l-lg"
-        }`}
-        style={isOpen ? { right: `${sidebarWidth}px` } : undefined}
-        title={isOpen ? "Close Trace Panel" : "Open Trace Panel"}
+      {/* Sidebar Container - slides in/out */}
+      <div
+        className="fixed top-0 bottom-0 z-[9998] flex transition-transform duration-300 ease-in-out"
+        style={{ 
+          right: 0,
+          transform: isOpen ? 'translateX(0)' : `translateX(${sidebarWidth}px)`
+        }}
       >
-        {isOpen ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
-      </button>
+        {/* Toggle Button - attached to sidebar */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="self-center bg-slate-100 text-slate-400 p-2 shadow-sm border border-slate-200 hover:bg-slate-200 hover:text-slate-600 transition-colors rounded-l-lg border-r-0"
+          title={isOpen ? "Close Trace Panel" : "Open Trace Panel"}
+        >
+          {isOpen ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+        </button>
 
-      {/* Sidebar Panel */}
-      {isOpen && (
+        {/* Sidebar Panel */}
         <div
-          className="fixed right-0 top-0 bottom-0 bg-slate-900 text-slate-100 shadow-2xl z-[9998] flex flex-col"
+          className="relative bg-slate-900 text-slate-100 shadow-2xl flex flex-col h-full"
           style={{ width: `${sidebarWidth}px`, fontSize: "12px" }}
         >
-          {/* Resize Handle */}
-          <div
-            onMouseDown={handleMouseDown}
-            className={`absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-purple-500 transition-colors ${
-              isResizing ? "bg-purple-500" : "bg-transparent hover:bg-purple-500/50"
-            }`}
-          />
+          {/* Resize Handle - only visible when open */}
+          {isOpen && (
+            <div
+              onMouseDown={handleMouseDown}
+              className={`absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-purple-500 transition-colors ${
+                isResizing ? "bg-purple-500" : "bg-transparent hover:bg-purple-500/50"
+              }`}
+            />
+          )}
 
           {/* Header */}
           <div className="p-3 border-b border-slate-700 flex-shrink-0">
@@ -422,7 +426,7 @@ export function TraceSidebar({ events, onClear, isConnected, threadId }: TraceSi
         </div>
       </div>
         </div>
-      )}
+      </div>
     </>
   );
 }

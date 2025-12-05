@@ -6,60 +6,7 @@ import { InterviewContainer } from "@/components/interview/InterviewContainer";
 import { DevSidebar } from "@/components/dev/DevSidebar";
 import { TraceSidebar } from "@/components/dev/TraceSidebar";
 import type { InterviewConfig } from "@/lib/types";
-
-// =============================================================================
-// DEFAULT INTERVIEW CONFIG
-// =============================================================================
-
-const DEFAULT_CONFIG: InterviewConfig = {
-  interview_type: "screener",
-  setup: {
-    companyName: "Acme Inc.",
-    jobTitle: "Software Engineer",
-    interviewerName: "Alex",
-  },
-  questions: [
-    {
-      type: "number_scale",
-      text: "How would you rate leadership at Acme?",
-      max_followups: 1,
-      group: "Leadership",
-    },
-    {
-      type: "long_answer",
-      text: "Explain your biggest concern with Acme's leadership team.",
-      max_followups: 2,
-      group: "Leadership",
-    },
-    {
-      type: "short_answer",
-      text: "What is your current city of residence?",
-      max_followups: 0,
-    },
-    {
-      type: "yes_no",
-      text: "Do you currently have a valid CDL?",
-      max_followups: 0,
-    },
-    {
-      type: "single_select",
-      text: "What is the highest level of education you have completed?",
-      options: [
-        "Some high school",
-        "High school",
-        "Bachelor's degree",
-        "Advanced degree",
-      ],
-      max_followups: 0,
-    },
-    {
-      type: "phone_number",
-      text: "What is your phone number?",
-      max_followups: 0,
-    },
-  ],
-  llm_fallback: false,
-};
+import { SCREENER_TEMPLATE, getTemplateWithSetup } from "@/lib/templates";
 
 // =============================================================================
 // MAIN PAGE
@@ -67,7 +14,7 @@ const DEFAULT_CONFIG: InterviewConfig = {
 
 export default function InterviewPage() {
   const interview = useInterview(false); // Streaming disabled until fixed
-  const [config, setConfig] = useState<InterviewConfig>(DEFAULT_CONFIG);
+  const [config, setConfig] = useState<InterviewConfig>(SCREENER_TEMPLATE);
   const [hasStarted, setHasStarted] = useState(false);
 
   // Start interview on mount
@@ -87,10 +34,19 @@ export default function InterviewPage() {
     }, 100);
   }, [interview, config]);
 
-  // Handle config updates
+  // Handle config updates - check if interview type changed
   const handleConfigChange = useCallback((newConfig: InterviewConfig) => {
-    setConfig(newConfig);
-  }, []);
+    // If interview type changed, load the appropriate template but preserve setup
+    if (newConfig.interview_type !== config.interview_type) {
+      const templateConfig = getTemplateWithSetup(
+        newConfig.interview_type,
+        newConfig.setup
+      );
+      setConfig(templateConfig);
+    } else {
+      setConfig(newConfig);
+    }
+  }, [config.interview_type]);
 
   // Handle trigger actions from dev sidebar
   const handleTrigger = useCallback((action: string) => {
@@ -114,7 +70,7 @@ export default function InterviewPage() {
   }, [interview]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-slate-100">
+    <div className="min-h-screen bg-slate-50">
       {/* Background Pattern */}
       <div className="fixed inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.5))] -z-10" />
 
@@ -188,6 +144,7 @@ export default function InterviewPage() {
               isStreaming={interview.isStreaming}
               error={interview.error}
               onRespond={interview.respond}
+              interviewType={config.interview_type}
             />
           </div>
 

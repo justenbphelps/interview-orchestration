@@ -6,6 +6,9 @@ import path from "path";
 loadEnvConfig(path.resolve(__dirname, ".."));
 
 const nextConfig: NextConfig = {
+  // Enable standalone output for Docker deployment
+  output: "standalone",
+  
   // Enable experimental features for streaming
   experimental: {
     serverActions: {

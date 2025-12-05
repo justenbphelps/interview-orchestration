@@ -127,6 +127,19 @@ export const validateSingleSelect = (
     };
   }
 
+  // Try "contains" match - check if any option is mentioned in the response
+  // This handles cases like "High school, although I also took some courses..."
+  const containsMatch = options.find(
+    (opt) => trimmed.includes(opt.toLowerCase())
+  );
+
+  if (containsMatch) {
+    return {
+      isValid: true,
+      normalizedValue: containsMatch,
+    };
+  }
+
   // Try matching by index (e.g., "1", "2", "a", "b")
   const indexMatch = parseOptionIndex(trimmed, options.length);
   if (indexMatch !== null && indexMatch < options.length) {

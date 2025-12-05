@@ -17,7 +17,7 @@ export function MessageList({ messages }: MessageListProps) {
 
   if (messages.length === 0) {
     return (
-      <div className="flex items-center justify-center h-32 text-muted-foreground">
+      <div className="flex items-center justify-center h-full text-muted-foreground">
         Starting interview...
       </div>
     );

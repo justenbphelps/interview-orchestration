@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # LangGraph Backend Server
+  langgraph:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "2024:2024"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
+      - LANGSMITH_TRACING=${LANGSMITH_TRACING:-false}
+      - LANGSMITH_PROJECT=${LANGSMITH_PROJECT:-interview-orchestration}
+    restart: unless-stopped
+
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_LANGGRAPH_URL=http://langgraph:2024
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    depends_on:
+      - langgraph
+    restart: unless-stopped

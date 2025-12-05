@@ -99,14 +99,18 @@ export const getCheckConcernsPrompt = (
 Question asked: "${questionText}"
 Response given: "${response}"
 
-Check for these categories:
+IMPORTANT: Normal workplace feedback, criticism, or complaints are NOT concerns. Only flag serious issues.
 
-1. EEOC ISSUES - Mentions of discrimination or harassment based on:
+Check for these specific categories:
+
+1. EEOC ISSUES - ONLY flag if there are explicit mentions of discrimination or harassment based on:
    - Race, color, religion, sex, gender, pregnancy
    - National origin, age (40+), disability
    - Genetic information, sexual orientation
-   - Hostile work environment, retaliation
-   - Being treated differently due to protected characteristics
+   - Hostile work environment specifically due to protected characteristics
+   - Retaliation for reporting discrimination
+   
+   DO NOT flag: General complaints about management, leadership criticism, or workplace frustrations.
    
 2. OUTSIDE SCOPE - Response that:
    - Does not address the question at all
@@ -114,12 +118,18 @@ Check for these categories:
    - Is asking questions instead of answering
    - Is about unrelated personal matters
    
-3. REPORTABLE INCIDENTS - Mentions of:
-   - Workplace safety violations or injuries
-   - Threats, violence, or intimidation
-   - Illegal activity (theft, fraud, embezzlement)
-   - Substance abuse at work
-   - Sexual misconduct
+   DO NOT flag: Responses that answer the question even if tangentially or with additional context.
+   
+3. REPORTABLE INCIDENTS - ONLY flag if there are explicit mentions of:
+   - Actual workplace safety violations causing injury
+   - Physical threats, violence, or intimidation
+   - Specific illegal activity (theft, fraud, embezzlement)
+   - Witnessed substance abuse at work
+   - Sexual misconduct or assault
+   
+   DO NOT flag: Criticism of leadership, strategic concerns, communication problems, or general workplace issues.
+
+When in doubt, respond with hasConcerns: false. Most interview responses are normal feedback.
 
 Respond in this exact JSON format only:
 {
