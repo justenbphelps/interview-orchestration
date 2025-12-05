@@ -293,26 +293,37 @@ export const getCheckRelevancePrompt = (
       expectedFormat = "Expected: An answer that addresses the question.";
   }
 
-  return `You are checking if an interview response is relevant to the question asked.
+  return `You are checking if an interview response actually answers the question asked.
 
 Question: "${questionText}"
 ${expectedFormat}
 
 Response: "${response}"
 
-Determine if the response is RELEVANT to the question. A response is relevant if:
-1. It attempts to answer what was asked (even if brief or incomplete)
-2. It relates to the topic of the question
-3. It's not completely random, off-topic, or nonsensical
+A response is RELEVANT only if it actually provides the type of information requested:
+- "Where" questions need a LOCATION (city, state, country, address, etc.)
+- "What" questions need a THING, DESCRIPTION, or EXPLANATION
+- "Why" questions need a REASON or EXPLANATION
+- "How" questions need a PROCESS, METHOD, or EXPLANATION
+- "When" questions need a TIME, DATE, or TIMEFRAME
+- "Who" questions need a PERSON or PEOPLE
+- Yes/no questions need YES or NO (with optional explanation)
+- Scale questions need a NUMBER
 
 A response is IRRELEVANT if:
-1. It's about a completely different topic
-2. It's random text, gibberish, or test input (like "asdf", "test", "123")
-3. It's a question back instead of an answer (unless clarifying the question)
-4. It completely ignores what was asked
+1. It doesn't match the expected answer type (e.g., answering "yes" to "where do you live?")
+2. It's about a completely different topic
+3. It's random text, gibberish, or test input (like "asdf", "test", "123", "hello")
+4. It's a question back instead of an answer
+5. It provides no actual information related to the question
+6. It's a one-word answer that doesn't fit the question type
 
-Be LENIENT - if there's any reasonable connection to the question, mark as relevant.
-Only mark irrelevant if the response truly has nothing to do with the question.
+Examples of IRRELEVANT responses:
+- Question: "Where are you located?" → Response: "yes" (wrong answer type)
+- Question: "What is your experience?" → Response: "good" (too vague, no actual info)
+- Question: "Why are you leaving?" → Response: "okay" (doesn't answer why)
+
+Be STRICT - the response must actually attempt to answer what was asked with appropriate information.
 
 Respond in this exact JSON format only:
 {
